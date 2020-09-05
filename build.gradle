@@ -11,6 +11,8 @@ repositories {
 
 dependencies {
     testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
+
+    implementation 'org.beryx:text-io:3.4.1'
 }
 
 test {
