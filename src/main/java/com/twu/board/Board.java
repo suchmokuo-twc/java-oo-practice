@@ -1,7 +1,14 @@
 package com.twu.board;
 
-import java.util.*;
-import com.twu.Utils;
+import com.twu.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Board {
     private final Set<Topic> generalTopics = new HashSet<>(8);
@@ -12,12 +19,12 @@ public class Board {
     }
 
     public void setFixedTopicRanking(Topic topic, int ranking) {
-        if (ranking < 1 || ranking > generalTopics.size()) {
+        if (ranking < 1 || ranking > totalTopics()) {
             throw new RuntimeException("range error");
         }
-        
-        Topic topicInRankingList = getTopic(topic);
-        topic.merge(topicInRankingList);
+
+        Topic topicInRanking = getTopic(topic);
+        topic.merge(topicInRanking);
         Topic oldFixedRankingTopic = fixedRankingTopics.get(ranking);
 
         if (oldFixedRankingTopic != null && oldFixedRankingTopic.getCurrentPrice() >= topic.getCurrentPrice()) {
@@ -59,7 +66,7 @@ public class Board {
     }
 
     public List<Topic> getRankingList() {
-        int len = generalTopics.size() + fixedRankingTopics.size();
+        int len = totalTopics();
         List<Topic> rankingList = new ArrayList<>(len);
 
         Iterator<Topic> topicIterator = generalTopics.stream().sorted().iterator();
@@ -75,13 +82,13 @@ public class Board {
         return rankingList;
     }
 
-    private void removeTopicInFixedRanking(Topic topic) {
-        if (!fixedRankingTopics.containsValue(topic)) {
-            return;
-        }
+    private int totalTopics() {
+        return generalTopics.size() + fixedRankingTopics.size();
+    }
 
-        fixedRankingTopics
-                .entrySet()
-                .removeIf(entry -> topic.equals(entry.getValue()));
+    private void removeTopicInFixedRanking(Topic topic) {
+        if (fixedRankingTopics.containsValue(topic)) {
+            fixedRankingTopics.entrySet().removeIf(entry -> topic.equals(entry.getValue()));
+        }
     }
 }

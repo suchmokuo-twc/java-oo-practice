@@ -1,8 +1,9 @@
 package com.twu.cli;
 
+import com.twu.utils.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static com.twu.Main.textIO;
@@ -26,32 +27,8 @@ public class Menu implements MenuItem {
     }
 
     public void show() {
-        final AtomicInteger i = new AtomicInteger(1);
-
-        Stream<MenuItem> itemStream =
-                parentMenu == null
-                        ? items.stream()
-                        : Stream.concat(items.stream(), Stream.of(goBack));
-
-        terminal.println("=================================================================================");
-        terminal.println(description + "：");
-
-        itemStream.forEach((item) -> terminal.printf("%d. %s\n", i.getAndIncrement(), item.getDescription()));
-
-        int itemsCount =
-                parentMenu == null
-                        ? items.size()
-                        : items.size() + 1;
-
-        int selectedItemIndex = textIO.newIntInputReader()
-                .withMinVal(1)
-                .withMaxVal(itemsCount)
-                .read("请选择");
-
-        MenuItem selectedItem =
-                selectedItemIndex <= items.size()
-                        ? items.get(selectedItemIndex - 1)
-                        : goBack;
+        printMenu();
+        MenuItem selectedItem = getSelectedItem();
 
         try {
             selectedItem.select();
@@ -70,6 +47,29 @@ public class Menu implements MenuItem {
     @Override
     public String getDescription() {
         return description;
+    }
+
+    private void printMenu() {
+        Stream<MenuItem> itemStream =
+                parentMenu == null
+                        ? items.stream()
+                        : Stream.concat(items.stream(), Stream.of(goBack));
+
+        terminal.println("=================================================================================");
+        terminal.println(description + "：");
+
+        Utils.streamForEach(itemStream, (item, i) -> terminal.printf("%d. %s\n", i + 1, item.getDescription()));
+    }
+
+    private MenuItem getSelectedItem() {
+        int itemsCount = parentMenu == null ? items.size() : items.size() + 1;
+
+        int selectedItemIndex = textIO.newIntInputReader()
+                .withMinVal(1)
+                .withMaxVal(itemsCount)
+                .read("请选择");
+
+        return selectedItemIndex <= items.size() ? items.get(selectedItemIndex - 1) : goBack;
     }
 
     public static Menu of(Menu parentMenu, String description, MenuItem... items) {
