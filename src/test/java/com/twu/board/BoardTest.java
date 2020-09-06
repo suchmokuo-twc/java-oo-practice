@@ -23,7 +23,7 @@ class BoardTest {
 
     @Test
     void should_set_fixed_ranking() {
-        board.setFixedTopicRanking(new Topic("c"), 1, 0);
+        board.setFixedTopicRanking(new Topic("c"), 1);
 
         List<Topic> expected = Arrays.asList(
                 new Topic("c"),
@@ -36,10 +36,10 @@ class BoardTest {
 
     @Test
     void should_set_fixed_ranking_fail() {
-        board.setFixedTopicRanking(new Topic("c"), 1, 100);
+        board.setFixedTopicRanking(new Topic("c", 100), 1);
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            board.setFixedTopicRanking(new Topic("a"), 1, 90);
+            board.setFixedTopicRanking(new Topic("a", 90), 1);
         });
 
         String expectedMessage = "money not enough";

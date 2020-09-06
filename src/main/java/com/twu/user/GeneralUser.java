@@ -18,6 +18,8 @@ public class GeneralUser extends User {
     }
 
     public void buyTopicRanking(Board board, String description, int ranking, int bid) {
-        board.setFixedTopicRanking(new Topic(description), ranking, bid);
+        Topic topic = new Topic(description, bid);
+
+        board.setFixedTopicRanking(topic, ranking);
     }
 }
