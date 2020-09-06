@@ -35,7 +35,7 @@ class BoardTest {
     }
 
     @Test
-    void should_set_fixed_ranking_fail() {
+    void should_set_fixed_ranking_fail_if_no_enough_money() {
         board.setFixedTopicRanking(new Topic("c", 100), 1);
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
@@ -46,5 +46,39 @@ class BoardTest {
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void should_set_fixed_ranking_fail_if_no_such_topic() {
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            board.setFixedTopicRanking(new Topic("d"), 1);
+        });
+
+        String expectedMessage = "no such topic";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+
+        board.setFixedTopicRanking(new Topic("a"), 1);
+
+        exception = assertThrows(RuntimeException.class, () -> {
+            board.setFixedTopicRanking(new Topic("d"), 1);
+        });
+
+        actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void should_set_fixed_ranking_for_topic_already_in_fixed_ranking_list() {
+        board.setFixedTopicRanking(new Topic("a"), 1);
+        board.setFixedTopicRanking(new Topic("b"), 2);
+        board.setFixedTopicRanking(new Topic("b", 10), 1);
+
+        assertIterableEquals(board.getRankingList(), Arrays.asList(
+                new Topic("b"),
+                new Topic("c")
+        ));
     }
 }

@@ -6,6 +6,8 @@ import com.twu.board.Topic;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static com.twu.Main.terminal;
+
 public class User {
     protected final String name;
     protected int points = 10;
@@ -25,9 +27,12 @@ public class User {
     public void browseRankingBoard(Board board) {
         List<Topic> rankingList = board.getRankingList();
 
+        terminal.println();
+        terminal.println("热搜榜：");
+
         IntStream.range(0, rankingList.size()).forEach(index -> {
             Topic topic = rankingList.get(index);
-            System.out.printf("%d. %s %d\n", index + 1, topic.getDescription(), topic.getPopularity());
+            terminal.printf("%d. %s %d\n", index + 1, topic.getDescription(), topic.getPopularity());
         });
     }
 

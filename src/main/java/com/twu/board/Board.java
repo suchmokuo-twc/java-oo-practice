@@ -1,56 +1,68 @@
 package com.twu.board;
 
 import java.util.*;
+import com.twu.Utils;
 
 public class Board {
-    private final Set<Topic> topics = new HashSet<>(8);
+    private final Set<Topic> generalTopics = new HashSet<>(8);
     private final Map<Integer, Topic> fixedRankingTopics = new HashMap<>(8);
 
     public void addTopic(Topic topic) {
-        topics.add(topic);
+        generalTopics.add(topic);
     }
 
     public void setFixedTopicRanking(Topic topic, int ranking) {
-        if (ranking < 1 || ranking > topics.size()) {
+        if (ranking < 1 || ranking > generalTopics.size()) {
             throw new RuntimeException("range error");
         }
-
+        
+        Topic topicInRankingList = getTopic(topic);
+        topic.merge(topicInRankingList);
         Topic oldFixedRankingTopic = fixedRankingTopics.get(ranking);
 
-        if (oldFixedRankingTopic != null) {
-            if (oldFixedRankingTopic.getCurrentPrice() >= topic.getCurrentPrice()) {
-                throw new RuntimeException("money not enough");
-            }
-
-            fixedRankingTopics.put(ranking, topic.merge(oldFixedRankingTopic));
-
-            return;
+        if (oldFixedRankingTopic != null && oldFixedRankingTopic.getCurrentPrice() >= topic.getCurrentPrice()) {
+            throw new RuntimeException("money not enough");
         }
 
-        Topic oldTopic = getTopic(topic);
+        if (generalTopics.contains(topic)) {
+            fixedRankingTopics.put(ranking, topic);
+            // delete previous topic as README said.
+            generalTopics.remove(topic);
+        } else {
+            // topic is in the fixed ranking map.
+            removeTopicInFixedRanking(topic);
+            fixedRankingTopics.put(ranking, topic);
+        }
+    }
 
-        if (oldTopic == null) {
+    public Topic getTopic(Topic topic) {
+        List<Topic> rankingList = getRankingList();
+        int index = rankingList.indexOf(topic);
+
+        if (index == -1) {
             throw new RuntimeException("no such topic");
         }
 
-        fixedRankingTopics.put(ranking, topic.merge(oldTopic));
-
-        // delete previous topic as README said.
-        topics.remove(topic);
+        return rankingList.get(index);
     }
 
-    public void increaseTopicPopularity(Topic topic, int points) {
-        topics.stream()
-                .filter(t -> t.equals(topic))
-                .findFirst()
-                .ifPresent(t -> t.increasePopularity(points));
+    public void updateTopic(Topic topic) {
+        Topic topicInRanking = getTopic(topic);
+        topic.merge(topicInRanking);
+
+        if (generalTopics.contains(topic)) {
+            generalTopics.add(topic);
+        } else {
+            int ranking = Utils.getKey(fixedRankingTopics, topic);
+            fixedRankingTopics.put(ranking, topic);
+        }
     }
 
     public List<Topic> getRankingList() {
-        int len = topics.size() + fixedRankingTopics.size();
+        int len = generalTopics.size() + fixedRankingTopics.size();
         List<Topic> rankingList = new ArrayList<>(len);
 
-        Iterator<Topic> topicIterator = topics.stream().sorted().iterator();
+        Iterator<Topic> topicIterator = generalTopics.stream().sorted().iterator();
 
         for (int i = 1; i <= len; i++) {
             Topic topic = fixedRankingTopics.containsKey(i)
@@ -63,10 +75,13 @@ public class Board {
         return rankingList;
     }
 
-    private Topic getTopic(Topic topic) {
-        return topics.stream()
-                .filter(t -> t.equals(topic))
-                .findFirst()
-                .orElse(null);
+    private void removeTopicInFixedRanking(Topic topic) {
+        if (!fixedRankingTopics.containsValue(topic)) {
+            return;
+        }
+
+        fixedRankingTopics
+                .entrySet()
+                .removeIf(entry -> topic.equals(entry.getValue()));
     }
 }

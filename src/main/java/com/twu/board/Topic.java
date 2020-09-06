@@ -37,15 +37,15 @@ public class Topic implements Comparable<Topic> {
         return this;
     }
 
-    protected void setCurrentPrice(int currentPrice) {
+    public void setCurrentPrice(int currentPrice) {
         this.currentPrice = currentPrice;
     }
 
-    protected int getCurrentPrice() {
+    public int getCurrentPrice() {
         return currentPrice;
     }
 
-    protected void increasePopularity(int points) {
+    public void increasePopularity(int points) {
         this.popularity += points;
     }
 

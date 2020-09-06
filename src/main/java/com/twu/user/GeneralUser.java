@@ -13,7 +13,9 @@ public class GeneralUser extends User {
             throw new RuntimeException("no enough points");
         }
 
-        board.increaseTopicPopularity(new Topic(description), points);
+        Topic topic = board.getTopic(new Topic(description));
+        topic.increasePopularity(points);
+        board.updateTopic(topic);
         this.points -= points;
     }
 

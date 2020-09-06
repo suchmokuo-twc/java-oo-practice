@@ -6,7 +6,7 @@ public class SuperTopic extends Topic {
     }
 
     @Override
-    protected void increasePopularity(int points) {
+    public void increasePopularity(int points) {
         super.increasePopularity(points * 2);
     }
 }
